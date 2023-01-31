@@ -2,13 +2,13 @@
 //  TIMFlowViewCell.swift
 //  TIMFlowView
 //
-//  Created by Tim's Mac Book Pro on 2020/1/16.
-//  Copyright © 2020 Tim. All rights reserved.
+//  Created by Allen Gao on 2023/1/10.
+//  Copyright © 2023 Xiamen Rilla Technology Co., LTD. All rights reserved.
 //
 
 import UIKit
 
-open class TIMFlowViewItem: UIView {
+open class MOLAWaterFlowViewItem: UIView {
     /// 重用标识符
     internal var reuseIdentifier: String
     

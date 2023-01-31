@@ -1,20 +1,20 @@
 //
-//  TIMFlowView.swift
-//  TIMFlowView
+//  MOLAWaterFlowView.swift
+//  MOLAWaterFlowView
 //
-//  Created by Tim's Mac Book Pro on 2020/1/16.
-//  Copyright © 2020 Tim. All rights reserved.
-//  API 主视图
+//  Created by Allen Gao on 2023/1/10.
+//  Copyright © 2023 Xiamen Rilla Technology Co., LTD. All rights reserved.
+//
 
 import UIKit
 
-open class TIMFlowView: UIScrollView {
+open class MOLAWaterFlowView: UIScrollView {
     // MARK: - Public Property
     /// 瀑布流数据源协议
     open weak var flowDataSource: TIMFlowViewDataSource? = nil
     
     /// 瀑布流代理协议
-    open weak var flowDelegate: TIMFlowViewDelegate?
+    open weak var flowDelegate: MOLAWaterFlowViewDelegate?
     
     /// 是否让分区头视图悬停
     public var floatingHeaderEnable: Bool = false
@@ -58,31 +58,31 @@ open class TIMFlowView: UIScrollView {
     private lazy var itemFrames: [Int: [CGRect]] = [:]
     
     /// 当前正在显示的所有 cell
-    private lazy var displayingItems: [TIMIndexPath: TIMFlowViewItem] = [:]
+    private lazy var displayingItems: [MOLAIndexPath: MOLAWaterFlowViewItem] = [:]
     
     /// cell 缓存池，存放已经滑出屏幕 frame 的 cell, key: section 索引， value: section对应的缓存池
-    private lazy var reuseableItems: [Int: Set<TIMFlowViewItem>] = [:]
+    private lazy var reusableItems: [Int: Set<MOLAWaterFlowViewItem>] = [:]
     
     /// 所有分区头视图的位置信息
     private lazy var sectionHeaderFrames: [CGRect?] = []
     
     /// 当前显示的分区头视图
-    private lazy var displayingSectionHeader: [Int: TIMFlowHeaderFooterView] = [:]
+    private lazy var displayingSectionHeader: [Int: MOLAWaterFlowHeaderFooterView] = [:]
     
     /// 分区头缓存池, 存放已经划出屏幕 frame 的 分区头视图
-    private lazy var reuseableSectionHeader: Set<TIMFlowHeaderFooterView> = []
+    private lazy var reusableSectionHeader: Set<MOLAWaterFlowHeaderFooterView> = []
     
     /// 所有分区尾视图的位置信息
     private lazy var sectionFooterFrames: [CGRect?] = []
     
     /// 当前显示的分区尾视图
-    private lazy var displayingSectionFooter: [Int: TIMFlowHeaderFooterView] = [:]
+    private lazy var displayingSectionFooter: [Int: MOLAWaterFlowHeaderFooterView] = [:]
     
     /// 分区尾缓存池，存放已经划出屏幕 frame 的 分区尾视图
-    private lazy var reuseableSectionFooter: Set<TIMFlowHeaderFooterView> = []
+    private lazy var reusableSectionFooter: Set<MOLAWaterFlowHeaderFooterView> = []
 
     /// 需要悬停的header
-    private var needFloatingHeader: [Int: TIMFlowHeaderFooterView] = [:]
+    private var needFloatingHeader: [Int: MOLAWaterFlowHeaderFooterView] = [:]
     
     /// 记录当前偏移量
     private var offsetY: CGFloat = 0
@@ -94,14 +94,14 @@ open class TIMFlowView: UIScrollView {
     private var currentFloatingIndex = 0
 
     /// 记录当前悬停的视图
-    private var currentFloatingHeaderView: TIMFlowHeaderFooterView?
+    private var currentFloatingHeaderView: MOLAWaterFlowHeaderFooterView?
     
     /// 记录临界点
     private var criticalY: CGFloat = 0
 }
 
 // MARK: - Life Cycle
-extension TIMFlowView {
+extension MOLAWaterFlowView {
     public override func willMove(toSuperview newSuperview: UIView?) {
         reloadData()
     }
@@ -141,7 +141,7 @@ extension TIMFlowView {
                         if sectionHeader != nil {
                             sectionHeader?.removeFromSuperview()
                             displayingSectionHeader.removeValue(forKey: sectionIndex)
-                            reuseableSectionHeader.insert(sectionHeader!)
+                            reusableSectionHeader.insert(sectionHeader!)
                         }
                     }
                 }
@@ -158,7 +158,7 @@ extension TIMFlowView {
                 let itemFrame = currentSectionItemFrames[i]
 
                 // 从字典中取出item
-                let indexPath = TIMIndexPath(sectionIndex, i)
+                let indexPath = MOLAIndexPath(sectionIndex, i)
                 var item = displayingItems[indexPath]
                 
                 if isInScreen(aFrame: itemFrame) {
@@ -172,7 +172,7 @@ extension TIMFlowView {
                     if item != nil {
                         item?.removeFromSuperview()
                         displayingItems.removeValue(forKey: indexPath)
-                        reuseableItems[sectionIndex]?.insert(item!)
+                        reusableItems[sectionIndex]?.insert(item!)
                     }
                 }
             }
@@ -191,7 +191,7 @@ extension TIMFlowView {
                     if sectionFooter != nil {
                         sectionFooter?.removeFromSuperview()
                         displayingSectionFooter.removeValue(forKey: sectionIndex)
-                        reuseableSectionFooter.insert(sectionFooter!)
+                        reusableSectionFooter.insert(sectionFooter!)
                     }
                 }
             }
@@ -200,9 +200,9 @@ extension TIMFlowView {
 }
 
 // MARK: - Public API
-public extension TIMFlowView {
+public extension MOLAWaterFlowView {
     /// 根据 self 的宽度计算 cell 的宽度
-    func itemWidhth(in section: Int) -> CGFloat {
+    func itemWidth(in section: Int) -> CGFloat {
         guard let numberOfSections = flowDataSource?.numberOfSections(in: self) else {
             return 0
         }
@@ -215,12 +215,13 @@ public extension TIMFlowView {
         // 获取列数
         guard let numberOfColumns = flowDataSource?.numberOfColumns(in: self, at: section),
             let leftMargin = flowDelegate?.margin(in: self, at: section, for: .left),
-            let rightMrgin = flowDelegate?.margin(in: self, at: section, for: .right),
+            let rightMargin = flowDelegate?.margin(in: self, at: section, for: .right),
+            let inset = flowDelegate?.inset(in: self),
             let columnMargin = flowDelegate?.margin(in: self, at: section, for: .column) else {
             return 0
         }
         
-        return (frame.width - leftMargin - rightMrgin - CGFloat(numberOfColumns - 1) * columnMargin) / CGFloat(numberOfColumns)
+        return (frame.width - leftMargin - rightMargin - inset.left - inset.right - CGFloat(numberOfColumns - 1) * columnMargin) / CGFloat(numberOfColumns)
     }
     
     /// 刷新当前数据
@@ -232,7 +233,7 @@ public extension TIMFlowView {
         
         displayingSectionHeader.removeAll()
         sectionHeaderFrames.removeAll()
-        reuseableSectionHeader.removeAll()
+        reusableSectionHeader.removeAll()
         
         // 将当前显示的所有 cell 从父视图移除
         displayingItems.forEach { (_, value) in
@@ -247,7 +248,7 @@ public extension TIMFlowView {
         itemFrames.removeAll()
 
         // 清空缓存池
-        reuseableItems.removeAll()
+        reusableItems.removeAll()
         
         // 删除分区尾视图
         displayingSectionFooter.forEach { (_, value) in
@@ -255,7 +256,7 @@ public extension TIMFlowView {
         }
         displayingSectionFooter.removeAll()
         sectionFooterFrames.removeAll()
-        reuseableSectionFooter.removeAll()
+        reusableSectionFooter.removeAll()
         
         // 删除保留的悬停数据
         needFloatingHeader.forEach { (_, value) in
@@ -279,7 +280,7 @@ public extension TIMFlowView {
         // 根据分区计算每个 header、footer、cell 的 frame
         for sectionIndex in 0 ..< numberOfSections {
             // 保存 item 的宽度
-            let itemW = self.itemWidhth(in: sectionIndex)
+            let itemW = self.itemWidth(in: sectionIndex)
             
             // 获取列数
             let columns = self.numberOfColumns(section: sectionIndex)
@@ -293,14 +294,15 @@ public extension TIMFlowView {
             let bottomMargin = self.margin(at: sectionIndex, for: .bottom)
             let columnMargin = self.margin(at: sectionIndex, for: .column)
             let rowMargin    = self.margin(at: sectionIndex, for: .row)
+            let inset = self.inset()
             
             // 获取当前分区的头视图
-            if let sectionHeaederView = self.flowDelegate?.viewForSectionHeader(in: self, at: sectionIndex) {
-                let sectionFrame = CGRect(x: 0, y: maxY, width: self.bounds.width, height: sectionHeaederView.frame.height)
+            if let sectionHeaderView = self.flowDelegate?.viewForSectionHeader(in: self, at: sectionIndex) {
+                let sectionFrame = CGRect(x: 0, y: maxY, width: self.bounds.width, height: sectionHeaderView.frame.height)
                 self.sectionHeaderFrames[sectionIndex] = sectionFrame
                 if floatingHeaderEnable == true {
-                    sectionHeaederView.frame = sectionFrame
-                    needFloatingHeader[sectionIndex] = sectionHeaederView
+                    sectionHeaderView.frame = sectionFrame
+                    needFloatingHeader[sectionIndex] = sectionHeaderView
                 }
                 maxY = sectionFrame.maxY
             }
@@ -314,7 +316,7 @@ public extension TIMFlowView {
             // 计算每个 item 的 frame
             var itemFrames: [CGRect] = []
             for itemIndex in 0 ..< numberOfItems {
-                let itemH = self.height(at: TIMIndexPath(sectionIndex, itemIndex))       // 高度
+                let itemH = self.height(at: MOLAIndexPath(sectionIndex, itemIndex))       // 高度
                 var itemColumn = 0                                                  // 当前列索引
                 var maxYOfItemColumn = maxYOfColumns[itemColumn]                    // 取出第一列的Y值
                 
@@ -326,7 +328,7 @@ public extension TIMFlowView {
                 }
                 
                 // 计算 item 的 x 坐标
-                let itemX: CGFloat = leftMargin + CGFloat(itemColumn) * (columnMargin + itemW)
+                let itemX: CGFloat = inset.left + leftMargin + CGFloat(itemColumn) * (columnMargin + itemW)
                 var itemY: CGFloat = 0
                 
                 if maxYOfItemColumn == maxY {
@@ -374,9 +376,9 @@ public extension TIMFlowView {
     }
     
     // 从缓存池中获取 item
-    func dequeueReuseableItem(with identifier: String) -> TIMFlowViewItem? {
-        var reuseItem: TIMFlowViewItem?
-        for (_, var value) in reuseableItems {
+    func dequeueReuseableItem(with identifier: String) -> MOLAWaterFlowViewItem? {
+        var reuseItem: MOLAWaterFlowViewItem?
+        for (_, var value) in reusableItems {
             for (_, item) in value.enumerated() {
                 if item.reuseIdentifier == identifier {
                     reuseItem = item
@@ -394,9 +396,9 @@ public extension TIMFlowView {
     }
     
     // 从缓存池中获取分区头视图
-    func dequeueReuseableSectionHeaderView<Header: TIMFlowHeaderFooterView>(with identifier: String) -> Header? {
+    func dequeueReuseableSectionHeaderView<Header: MOLAWaterFlowHeaderFooterView>(with identifier: String) -> Header? {
         var reuseHeader: Header?
-        for (_, header) in reuseableSectionHeader.enumerated() {
+        for (_, header) in reusableSectionHeader.enumerated() {
             if header.reuseIdentifier == identifier {
                 reuseHeader = header as? Header
                 break
@@ -404,7 +406,7 @@ public extension TIMFlowView {
         }
         
         if reuseHeader != nil {
-            reuseableSectionHeader.remove(reuseHeader!)
+            reusableSectionHeader.remove(reuseHeader!)
         }
         
         return reuseHeader
@@ -420,7 +422,7 @@ public extension TIMFlowView {
         }
         
         let point = touch.location(in: self)
-        var selectedIndexPath: TIMIndexPath? = nil
+        var selectedIndexPath: MOLAIndexPath? = nil
         for (key, value) in displayingItems {
             if value.frame.contains(point) {
                 selectedIndexPath = key
@@ -435,13 +437,13 @@ public extension TIMFlowView {
 }
 
 // MARK: - Private API
-extension TIMFlowView {
+extension MOLAWaterFlowView {
     private func isInScreen(aFrame: CGRect) -> Bool {
         (aFrame.maxY > contentOffset.y) && (aFrame.minY < (contentOffset.y + bounds.height))
     }
     
     
-    private func margin(at section: Int, for type: TIMFlowViewCellMarginType) -> CGFloat {
+    private func margin(at section: Int, for type: MOLAWaterFlowViewCellMarginType) -> CGFloat {
         if let margin = flowDelegate?.margin(in: self, at: section, for: type) {
             return margin
         }
@@ -449,7 +451,13 @@ extension TIMFlowView {
         return DEFAULT_CELL_MARGIN
     }
     
-    
+    private func inset() -> UIEdgeInsets {
+        if let inset = flowDelegate?.inset(in: self) {
+            return inset
+        }
+        
+        return UIEdgeInsets.zero
+    }
     
     private func numberOfColumns(section: Int) -> Int {
         if let columns = flowDataSource?.numberOfColumns(in: self, at: section){
@@ -459,7 +467,7 @@ extension TIMFlowView {
         return DEFAULT_COLUMN_COUNT
     }
     
-    private func height(at indexPath: TIMIndexPath) -> CGFloat {
+    private func height(at indexPath: MOLAIndexPath) -> CGFloat {
         
         if let height = flowDelegate?.itemHeight(in: self, at: indexPath) {
             return height
@@ -470,7 +478,7 @@ extension TIMFlowView {
 }
 
 
-extension TIMFlowView: UIScrollViewDelegate {
+extension MOLAWaterFlowView: UIScrollViewDelegate {
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if floatingHeaderEnable {
             

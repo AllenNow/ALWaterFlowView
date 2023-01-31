@@ -1,10 +1,10 @@
 //
-//  TIMFlowViewUtils.swift
-//  TIMFlowView
+//  MOLAWaterFlowViewUtils.swift
+//  MOLAWaterFlowView
 //
-//  Created by Tim's Mac Book Pro on 2020/1/16.
-//  Copyright © 2020 Tim. All rights reserved.
-//  一些常量值
+//  Created by Allen Gao on 2023/1/10.
+//  Copyright © 2023 Xiamen Rilla Technology Co., LTD. All rights reserved.
+//
 
 /// 瀑布流默认列数
 internal let DEFAULT_COLUMN_COUNT          = 2
@@ -47,7 +47,4 @@ public let kScreenSize   = kScreenBounds.size
 
 /// 分辨率缩放比例
 public let kScreenScale = UIScreen.main.scale
-
-/// 客服QQ
-public let kCustomerServiceQQ = "800184955"
 

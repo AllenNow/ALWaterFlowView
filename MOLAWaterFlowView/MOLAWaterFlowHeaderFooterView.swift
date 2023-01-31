@@ -1,14 +1,14 @@
 //
-//  TIMFlowHeaderFooterView.swift
-//  TIMFlowView
+//  MOLAWaterFlowHeaderFooterView.swift
+//  MOLAWaterFlowView
 //
-//  Created by Tim on 2020/2/7.
-//  Copyright © 2020 CocoaPods. All rights reserved.
+//  Created by Allen Gao on 2023/1/10.
+//  Copyright © 2023 Xiamen Rilla Technology Co., LTD. All rights reserved.
 //
 
 import UIKit
 
-open class TIMFlowHeaderFooterView: UIView {
+open class MOLAWaterFlowHeaderFooterView: UIView {
 
    /// 重用标识符
     internal var reuseIdentifier: String
