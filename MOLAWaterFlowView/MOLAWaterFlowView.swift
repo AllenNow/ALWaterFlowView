@@ -480,6 +480,9 @@ extension MOLAWaterFlowView {
 
 extension MOLAWaterFlowView: UIScrollViewDelegate {
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView != self {
+            return
+        }
         flowDelegate?.waterFlowViewDidScroll(self)
         if floatingHeaderEnable {
             
