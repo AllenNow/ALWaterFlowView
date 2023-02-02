@@ -2,7 +2,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'MOLAWaterFlowView'
-  s.version          = '1.0.1'
+  s.version          = '1.0.2'
   s.summary          = 'ScrollView实现的瀑布流视图'
 
   s.description      = <<-DESC
