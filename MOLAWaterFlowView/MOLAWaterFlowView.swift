@@ -114,7 +114,7 @@ extension MOLAWaterFlowView {
         // 待研究更理想的算法
         
         // 获取分区数
-        let numberOfSection: Int! = flowDataSource?.numberOfSections(in: self)
+        let numberOfSection: Int! = flowDataSource?.numberOfSections(self)
         
         for sectionIndex in 0 ..< numberOfSection {
             // 布局分区头视图
@@ -132,7 +132,7 @@ extension MOLAWaterFlowView {
                     var sectionHeader = displayingSectionHeader[sectionIndex]
                     if isInScreen(aFrame: sectionHeaderFrame) {
                         if sectionHeader == nil {
-                            sectionHeader = flowDelegate?.viewForSectionHeader(in: self, at: sectionIndex)
+                            sectionHeader = flowDelegate?.waterFlowView(self, viewForSectionHeaderIn: sectionIndex)
                             sectionHeader?.frame = sectionHeaderFrame
                             addSubview(sectionHeader!)
                             displayingSectionHeader[sectionIndex] = sectionHeader
@@ -163,7 +163,7 @@ extension MOLAWaterFlowView {
                 
                 if isInScreen(aFrame: itemFrame) {
                     if item == nil {
-                        item = flowDataSource?.flowViewItem(in: self, at: indexPath)
+                        item = flowDataSource?.flowViewItem(self, at: indexPath)
                         item?.frame = itemFrame
                         addSubview(item!)
                         displayingItems[indexPath] = item
@@ -182,7 +182,7 @@ extension MOLAWaterFlowView {
                 var sectionFooter = displayingSectionFooter[sectionIndex]
                 if isInScreen(aFrame: sectionFooterFrame) {
                     if sectionFooter == nil {
-                        sectionFooter = flowDelegate?.viewForSectionFooter(in: self, at: sectionIndex)
+                        sectionFooter = flowDelegate?.waterFlowView(self, viewForSectionFooterIn: sectionIndex)
                         sectionFooter?.frame = sectionFooterFrame
                         addSubview(sectionFooter!)
                         displayingSectionFooter[sectionIndex] = sectionFooter
@@ -203,7 +203,7 @@ extension MOLAWaterFlowView {
 public extension MOLAWaterFlowView {
     /// 根据 self 的宽度计算 cell 的宽度
     func itemWidth(in section: Int) -> CGFloat {
-        guard let numberOfSections = flowDataSource?.numberOfSections(in: self) else {
+        guard let numberOfSections = flowDataSource?.numberOfSections(self) else {
             return 0
         }
         
@@ -213,11 +213,11 @@ public extension MOLAWaterFlowView {
         }
         
         // 获取列数
-        guard let numberOfColumns = flowDataSource?.numberOfColumns(in: self, at: section),
-            let leftMargin = flowDelegate?.margin(in: self, at: section, for: .left),
-            let rightMargin = flowDelegate?.margin(in: self, at: section, for: .right),
-            let inset = flowDelegate?.inset(in: self),
-            let columnMargin = flowDelegate?.margin(in: self, at: section, for: .column) else {
+        guard let numberOfColumns = flowDataSource?.numberOfColumns(self, at: section),
+            let leftMargin = flowDelegate?.waterFlowViewMargin(self, in: section, for: .left),
+            let rightMargin = flowDelegate?.waterFlowViewMargin(self, in: section, for: .right),
+            let inset = flowDelegate?.waterFlowViewInset(self),
+            let columnMargin = flowDelegate?.waterFlowViewMargin(self, in: section, for: .column) else {
             return 0
         }
         
@@ -265,7 +265,7 @@ public extension MOLAWaterFlowView {
         needFloatingHeader.removeAll()
         
         // 获取分区数
-        guard let numberOfSections: Int = flowDataSource?.numberOfSections(in: self) else {
+        guard let numberOfSections: Int = flowDataSource?.numberOfSections(self) else {
             return
         }
             
@@ -286,7 +286,7 @@ public extension MOLAWaterFlowView {
             let columns = self.numberOfColumns(section: sectionIndex)
             
             // 获取当前分区的 cell 的数量
-            let numberOfItems = (self.flowDataSource?.numberOfItems(in: self, at: sectionIndex))!
+            let numberOfItems = (self.flowDataSource?.numberOfItems(self, at: sectionIndex))!
             
             // 获取当前分区的间距设置
             let topMargin    = self.margin(at: sectionIndex, for: .top)
@@ -297,7 +297,7 @@ public extension MOLAWaterFlowView {
             let inset = self.inset()
             
             // 获取当前分区的头视图
-            if let sectionHeaderView = self.flowDelegate?.viewForSectionHeader(in: self, at: sectionIndex) {
+            if let sectionHeaderView = self.flowDelegate?.waterFlowView(self, viewForSectionHeaderIn: sectionIndex) {
                 let sectionFrame = CGRect(x: 0, y: maxY, width: self.bounds.width, height: sectionHeaderView.frame.height)
                 self.sectionHeaderFrames[sectionIndex] = sectionFrame
                 if floatingHeaderEnable == true {
@@ -354,7 +354,7 @@ public extension MOLAWaterFlowView {
             
             maxY = maxY + bottomMargin
             
-            if let sectionFooterView = self.flowDelegate?.viewForSectionFooter(in: self, at: sectionIndex) {
+            if let sectionFooterView = self.flowDelegate?.waterFlowView(self, viewForSectionFooterIn: sectionIndex) {
                 let footerFrame = CGRect(x: 0, y: maxY, width: self.bounds.width, height: sectionFooterView.frame.height)
                 self.sectionFooterFrames[sectionIndex] = footerFrame
                 maxY = footerFrame.maxY
@@ -376,7 +376,7 @@ public extension MOLAWaterFlowView {
     }
     
     // 从缓存池中获取 item
-    func dequeueReuseableItem(with identifier: String) -> MOLAWaterFlowViewItem? {
+    func dequeueReusableItem(with identifier: String) -> MOLAWaterFlowViewItem? {
         var reuseItem: MOLAWaterFlowViewItem?
         for (_, var value) in reusableItems {
             for (_, item) in value.enumerated() {
@@ -396,7 +396,7 @@ public extension MOLAWaterFlowView {
     }
     
     // 从缓存池中获取分区头视图
-    func dequeueReuseableSectionHeaderView<Header: MOLAWaterFlowHeaderFooterView>(with identifier: String) -> Header? {
+    func dequeueReusableSectionHeaderView<Header: MOLAWaterFlowHeaderFooterView>(with identifier: String) -> Header? {
         var reuseHeader: Header?
         for (_, header) in reusableSectionHeader.enumerated() {
             if header.reuseIdentifier == identifier {
@@ -430,8 +430,8 @@ public extension MOLAWaterFlowView {
             }
         }
         
-        if selectedIndexPath != nil {
-            flowDelegate?.didSelected(in: self, at: selectedIndexPath!)
+        if let selectedIndexPath = selectedIndexPath {
+            flowDelegate?.waterFlowView(self, didSelect: selectedIndexPath)
         }
     }
 }
@@ -444,7 +444,7 @@ extension MOLAWaterFlowView {
     
     
     private func margin(at section: Int, for type: MOLAWaterFlowViewCellMarginType) -> CGFloat {
-        if let margin = flowDelegate?.margin(in: self, at: section, for: type) {
+        if let margin = flowDelegate?.waterFlowViewMargin(self, in: section, for: type) {
             return margin
         }
         
@@ -452,7 +452,7 @@ extension MOLAWaterFlowView {
     }
     
     private func inset() -> UIEdgeInsets {
-        if let inset = flowDelegate?.inset(in: self) {
+        if let inset = flowDelegate?.waterFlowViewInset(self) {
             return inset
         }
         
@@ -460,7 +460,7 @@ extension MOLAWaterFlowView {
     }
     
     private func numberOfColumns(section: Int) -> Int {
-        if let columns = flowDataSource?.numberOfColumns(in: self, at: section){
+        if let columns = flowDataSource?.numberOfColumns(self, at: section){
             return columns
         }
         
@@ -469,7 +469,7 @@ extension MOLAWaterFlowView {
     
     private func height(at indexPath: MOLAIndexPath) -> CGFloat {
         
-        if let height = flowDelegate?.itemHeight(in: self, at: indexPath) {
+        if let height = flowDelegate?.waterFlowViewItemHeight(self, at: indexPath) {
             return height
         }
         
@@ -480,6 +480,7 @@ extension MOLAWaterFlowView {
 
 extension MOLAWaterFlowView: UIScrollViewDelegate {
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        flowDelegate?.waterFlowViewDidScroll(self)
         if floatingHeaderEnable {
             
             if currentFloatingIndex >= needFloatingHeader.count || currentFloatingIndex < 0 {
@@ -511,7 +512,7 @@ extension MOLAWaterFlowView: UIScrollViewDelegate {
                             sectionMaxY < itemFrames[i].maxY ? (sectionMaxY = itemFrames[i].maxY) : (sectionMaxY = sectionMaxY)
                         }
                         
-                        sectionMaxY += flowDelegate?.margin(in: self, at: currentFloatingIndex, for: .bottom) ?? 0
+                        sectionMaxY += flowDelegate?.waterFlowViewMargin(self, in: currentFloatingIndex, for: .bottom) ?? 0
                     }
                 }
                 
