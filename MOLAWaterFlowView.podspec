@@ -2,8 +2,8 @@
 
 Pod::Spec.new do |s|
   s.name             = 'MOLAWaterFlowView'
-  s.version          = '1.0.0'
-  s.summary          = 'Swift 模仿 UITableView 写的一个瀑布流视图'
+  s.version          = '1.0.1'
+  s.summary          = 'ScrollView实现的瀑布流视图'
 
   s.description      = <<-DESC
   完全模仿 UITableView 实现的瀑布流视图，支持分区显示、添加分区头尾视图，添加视图头尾视图，九宫格视图、瀑布流视图，分区头滑动悬停等操作。
